@@ -1,117 +1,159 @@
+using System;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.Serialization;
 
 public class MoveController : MonoBehaviour
 {
-    public float walkSpeed = 4;
-    public float sprintSpeed = 8; 
-    public float jumpHeight = 4;
-    [Space]
-    public float airControl = 0.5f;
-    
-    [Space]
-    public CharacterController characterController; // Rigidbody yerine CharacterController kullanılacak
-    private Vector2 input;
-    
-    private bool sprinting = false;
-    private bool jumping = false;    
-    private bool grounded = false;
-    
-    private Vector3 moveDirection = Vector3.zero;
-    private float verticalVelocity = 0;
-    private float gravity = 20f;
+    [Header("Movement Settings")]
+    [SerializeField] private MoveSettings _moveSettings;
 
-    private PhotonView photonView; // Photon için eklendi
+    [Header("References")] 
+    [SerializeField] private CharacterController _characterController; 
+    [SerializeField] private PhotonView _photonView;
+
+    private Vector2 _input;
+    private Vector2 _smoothInput;
+    private Vector2 _smoothInputVelocity;
+
+    private bool _sprinting = false;
+    private bool _jumping = false;
+    private bool _grounded = false;
+    private Vector3 _smoothMoveDirection;
+    private Vector3 _smoothMoveVelocity;
+
+    private float _verticalVelocity = 0;
+    private float _gravity = 20f;
+
+
+    private Vector3 _networkPosition;
+    private Quaternion _networkRotation;
+    private float _syncTime = 0;
+    private float _syncDelay = 0;
+    private float _lastSyncTime = 0;
 
     private void Awake()
     {
-        characterController = GetComponent<CharacterController>();
-        if (characterController == null)
-            characterController = gameObject.AddComponent<CharacterController>();
-            
-        photonView = GetComponent<PhotonView>();
+        _photonView = GetComponent<PhotonView>();
+
+        if (_photonView && !_photonView.IsMine)
+        {
+            _networkPosition = transform.position;
+            _networkRotation = transform.rotation;
+        }
     }
 
     private void Update()
     {
-        // Sadece lokal oyuncu için girdi al
-        if (photonView && !photonView.IsMine) return;
-        
-        input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        input.Normalize();
-        sprinting = Input.GetButton("Sprint");
-        jumping = Input.GetButton("Jump");
-        
-        // Zemin kontrolü
-        grounded = characterController.isGrounded;
-        
-        // Yerçekimi ve zıplama
-        if (grounded)
+        if (_photonView && !_photonView.IsMine)
         {
-            verticalVelocity = -1f; // Zemine yapışması için küçük bir değer
-            
-            if (jumping)
+            SmoothSyncMovement();
+            return;
+        }
+
+        _input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+
+        _smoothInput = Vector2.SmoothDamp(_smoothInput, _input.normalized, ref _smoothInputVelocity, _moveSettings.smoothTime);
+
+        _sprinting = Input.GetButton("Sprint");
+        _jumping = Input.GetButtonDown("Jump");
+        _grounded = _characterController.isGrounded;
+
+        MovePlayer();
+
+        if (_photonView && _photonView.IsMine && PhotonNetwork.IsConnected)
+        {
+            SyncPosition();
+        }
+    }
+
+    private void MovePlayer()
+    {
+        if (_grounded)
+        {
+            _verticalVelocity = -1f;
+
+            if (_jumping)
             {
-                verticalVelocity = Mathf.Sqrt(2f * gravity * jumpHeight);
+                _verticalVelocity = Mathf.Sqrt(2f * _gravity * _moveSettings.jumpHeight);
             }
         }
         else
         {
-            verticalVelocity -= gravity * Time.deltaTime;
+            _verticalVelocity -= _gravity * Time.deltaTime;
         }
-        
-        // Hareket yönünü hesapla
-        Vector3 targetDirection = CalculateMovement(sprinting ? sprintSpeed : walkSpeed);
-        
-        // Havadayken kontrolü azalt
-        if (!grounded)
+
+        float speed = _sprinting ? _moveSettings.sprintSpeed : _moveSettings.walkSpeed;
+        Vector3 targetDirection = new Vector3(_smoothInput.x, 0, _smoothInput.y);
+        targetDirection = transform.TransformDirection(targetDirection);
+
+        if (!_grounded)
         {
-            targetDirection *= airControl;
+            targetDirection *= _moveSettings.airControl;
         }
-        
-        // Dikey hızı ekle
-        targetDirection.y = verticalVelocity;
-        
-        // CharacterController ile hareket et
-        characterController.Move(targetDirection * Time.deltaTime);
-        
-        // Eğer bu ağ üzerindeki lokal oyuncuysa, pozisyonu senkronize et
-        if (photonView && photonView.IsMine && PhotonNetwork.IsConnected)
+
+        _smoothMoveDirection = Vector3.SmoothDamp(_smoothMoveDirection, targetDirection * speed,
+            ref _smoothMoveVelocity, _moveSettings.smoothTime);
+
+        Vector3 movement = _smoothMoveDirection;
+        movement.y = _verticalVelocity;
+
+        _characterController.Move(movement * Time.deltaTime);
+
+        if (_smoothInput.magnitude > 0.1f)
         {
-            if (Time.frameCount % 3 == 0) // Her 3 karede bir pozisyon gönder
+            Vector3 lookDirection = new Vector3(_smoothMoveDirection.x, 0, _smoothMoveDirection.z);
+            if (lookDirection != Vector3.zero)
             {
-                SyncPosition();
+                Quaternion targetRotation = Quaternion.LookRotation(lookDirection);
+                transform.rotation =
+                    Quaternion.Slerp(transform.rotation, targetRotation, _moveSettings.rotationSpeed * Time.deltaTime);
             }
         }
     }
 
-    private Vector3 CalculateMovement(float speed)
-    {
-        Vector3 targetVelocity = new Vector3(input.x, 0, input.y);
-        targetVelocity = transform.TransformDirection(targetVelocity);
-        targetVelocity *= speed;
-        
-        return targetVelocity;
-    }
-    
     private void SyncPosition()
     {
-        if (photonView == null) return;
-        
-        photonView.RPC("NetworkSyncPosition", RpcTarget.Others, transform.position, transform.rotation);
+        if (Time.time - _lastSyncTime > 0.1f)
+        {
+            _lastSyncTime = Time.time;
+            _photonView.RPC("NetworkSyncPosition", RpcTarget.Others, transform.position, transform.rotation,
+                _verticalVelocity);
+        }
     }
-    
+
     [PunRPC]
-    private void NetworkSyncPosition(Vector3 position, Quaternion rotation)
+    private void NetworkSyncPosition(Vector3 position, Quaternion rotation, float vertVelocity)
     {
-        // Bu RPC sadece diğer oyuncular için çalışır
-        if (photonView.IsMine) return;
-        
-        // Hedef pozisyona yumuşak geçiş yap
-        transform.position = Vector3.Lerp(transform.position, position, Time.deltaTime * 10);
-        transform.rotation = Quaternion.Lerp(transform.rotation, rotation, Time.deltaTime * 10);
+        if (_photonView.IsMine) return;
+
+        _syncTime = 0;
+        _syncDelay = Time.time - _lastSyncTime;
+        _lastSyncTime = Time.time;
+
+        _networkPosition = position;
+        _networkRotation = rotation;
+        _verticalVelocity = vertVelocity;
     }
-    
-    // Artık OnTriggerStay gerekmiyor çünkü CharacterController.isGrounded kullanıyoruz
-    // private void OnTriggerStay(Collider other) kaldırıldı
+
+    private void SmoothSyncMovement()
+    {
+        _syncTime += Time.deltaTime;
+        float interpolation = _syncTime / _syncDelay;
+        interpolation = interpolation * interpolation * (3.0f - 2.0f * interpolation); // Smoothstep
+
+        transform.position = Vector3.Lerp(transform.position, _networkPosition, interpolation);
+        transform.rotation = Quaternion.Slerp(transform.rotation, _networkRotation, interpolation);
+    }
+
+    [Serializable]
+    public class MoveSettings
+    {
+        public float walkSpeed = 4f;
+        public float sprintSpeed = 8f;
+        public float jumpHeight = 4f;
+        [Space] public float airControl = 0.5f;
+        [Space] public float smoothTime = 0.15f;
+        public float rotationSpeed = 10f;
+    }
 }
