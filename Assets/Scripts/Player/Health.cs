@@ -1,26 +1,34 @@
-using System.Collections;
-using System.Collections.Generic;
+using FPSGame.Networking;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
 
-public class Health : MonoBehaviour
+namespace FPSGame.Player
 {
-    public int _health = 100;
-    public TextMeshProUGUI healthText;
-    public bool isLocalPlayer;
-    [PunRPC]
-    public void TakeDamage(int damage)
+    public interface IDamageable
     {
-        _health -= damage;
-        healthText.text = _health.ToString();
+        void TakeDamage(int damage);
+    }
 
-        if (_health > 0) return;
-        Destroy(gameObject); 
-        if (isLocalPlayer)
+    public class Health : MonoBehaviour, IDamageable
+    {
+        public int _health = 100;
+        public TextMeshProUGUI healthText;
+        public bool isLocalPlayer;
+
+        [PunRPC]
+        public void TakeDamage(int damage)
         {
-            RoomManager.instance.PlayerSpawn();
-            RoomManager.instance.AddDeath(); 
+            _health -= damage;
+            healthText.text = _health.ToString();
+
+            if (_health > 0) return;
+            Destroy(gameObject);
+            if (isLocalPlayer)
+            {
+                RoomManager.instance.PlayerSpawn();
+                RoomManager.instance.AddDeath();
+            }
         }
     }
 }

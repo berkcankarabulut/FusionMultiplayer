@@ -1,18 +1,22 @@
 using TMPro;
 using UnityEngine;
 
-public class ServerSlot : MonoBehaviour
+namespace FPSGame.Networking
 {
-    [SerializeField] private TextMeshProUGUI _serverNameText;
-    [SerializeField] private TextMeshProUGUI _playerCountText;
-    public void Init(string serverName, string playerCount)
+    public class ServerSlot : MonoBehaviour
     {
-        _serverNameText.text = serverName;
-        _playerCountText.text = playerCount;
-    }
+        [SerializeField] private TextMeshProUGUI _serverNameText;
+        [SerializeField] private TextMeshProUGUI _playerCountText;
 
-    public void Join()
-    {
-        RoomList.instance.CreateOrJoinRoom(_serverNameText.text);
+        public void Init(string serverName, string playerCount)
+        {
+            _serverNameText.text = serverName;
+            _playerCountText.text = playerCount;
+        }
+
+        public void Join()
+        {
+            RoomList.instance.CreateOrJoinRoom(_serverNameText.text);
+        }
     }
 }

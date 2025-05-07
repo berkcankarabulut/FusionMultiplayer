@@ -3,7 +3,7 @@ using Photon.Pun;
 using TMPro;
 using UnityEngine;
 
-namespace Player
+namespace FPSGame.Player
 {
     public class PlayerSetup : MonoBehaviour
     {

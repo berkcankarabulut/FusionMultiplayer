@@ -1,10 +1,11 @@
-using System;
+using FPSGame.Networking;
+using FPSGame.Player;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using TMPro;
 using UnityEngine;
 
-namespace Weapon
+namespace FPSGame.Weapons
 {
     public class WeaponController : MonoBehaviour
     {

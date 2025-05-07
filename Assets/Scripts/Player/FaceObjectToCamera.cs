@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FaceObjectToCamera : MonoBehaviour
-{  
-    void Update()
+namespace FPSGame.Player
+{
+    public class FaceObjectToCamera : MonoBehaviour
     {
-        transform.LookAt(Camera.main.transform);
+        void Update()
+        {
+            transform.LookAt(Camera.main.transform);
+        }
     }
 }
