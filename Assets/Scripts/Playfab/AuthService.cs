@@ -3,81 +3,84 @@ using PlayFab;
 using PlayFab.ClientModels;
 using UnityEngine;
 
-public class AuthService
+namespace FPSGame.PlayFab
 {
-    public void LoginWithEmail(
-        string email,
-        string password,
-        Action<LoginResult> onSuccess = null,
-        Action<PlayFabError> onFail = null
-    )
+    public class AuthService
     {
-        var request = new LoginWithEmailAddressRequest { Email = email, Password = password };
-        PlayFabClientAPI.LoginWithEmailAddress(
-            request,
-            result =>
-            {
-                Debug.Log(result.PlayFabId + " logged in");
-                onSuccess?.Invoke(result);
-            },
-            error =>
-            {
-                Debug.Log(error.ErrorMessage);
-                onFail?.Invoke(error);
-            }
-        );
-    }
-
-    public void LoginWithUsername(
-        string username,
-        string password,
-        Action<LoginResult> onSuccess = null,
-        Action<PlayFabError> onFail = null
-    )
-    {
-        var request = new LoginWithPlayFabRequest { Username = username, Password = password };
-        PlayFabClientAPI.LoginWithPlayFab(
-            request,
-            result =>
-            {
-                Debug.Log(result.PlayFabId + " logged in");
-                onSuccess?.Invoke(result);
-            },
-            error =>
-            {
-                Debug.Log(error.ErrorMessage);
-                onFail?.Invoke(error);
-            }
-        );
-    }
-
-    public void RegisterWithEmail(
-        string email,
-        string password,
-        string username,
-        Action<RegisterPlayFabUserResult> onSuccess = null,
-        Action<PlayFabError> onFail = null
-    )
-    {
-        var request = new RegisterPlayFabUserRequest
+        public void LoginWithEmail(
+            string email,
+            string password,
+            Action<LoginResult> onSuccess = null,
+            Action<PlayFabError> onFail = null
+        )
         {
-            Email = email,
-            Password = password,
-            Username = username,
-            RequireBothUsernameAndEmail = true,
-        };
-        PlayFabClientAPI.RegisterPlayFabUser(
-            request,
-            result =>
+            var request = new LoginWithEmailAddressRequest { Email = email, Password = password };
+            PlayFabClientAPI.LoginWithEmailAddress(
+                request,
+                result =>
+                {
+                    Debug.Log(result.PlayFabId + " logged in");
+                    onSuccess?.Invoke(result);
+                },
+                error =>
+                {
+                    Debug.Log(error.ErrorMessage);
+                    onFail?.Invoke(error);
+                }
+            );
+        }
+
+        public void LoginWithUsername(
+            string username,
+            string password,
+            Action<LoginResult> onSuccess = null,
+            Action<PlayFabError> onFail = null
+        )
+        {
+            var request = new LoginWithPlayFabRequest { Username = username, Password = password };
+            PlayFabClientAPI.LoginWithPlayFab(
+                request,
+                result =>
+                {
+                    Debug.Log(result.PlayFabId + " logged in");
+                    onSuccess?.Invoke(result);
+                },
+                error =>
+                {
+                    Debug.Log(error.ErrorMessage);
+                    onFail?.Invoke(error);
+                }
+            );
+        }
+
+        public void RegisterWithEmail(
+            string email,
+            string password,
+            string username,
+            Action<RegisterPlayFabUserResult> onSuccess = null,
+            Action<PlayFabError> onFail = null
+        )
+        {
+            var request = new RegisterPlayFabUserRequest
             {
-                Debug.Log("Kayıt başarılı: " + result.PlayFabId);
-                onSuccess?.Invoke(result);
-            },
-            error =>
-            {
-                Debug.Log(error.ErrorMessage);
-                onFail?.Invoke(error);
-            }
-        );
+                Email = email,
+                Password = password,
+                Username = username,
+                RequireBothUsernameAndEmail = true,
+            };
+            PlayFabClientAPI.RegisterPlayFabUser(
+                request,
+                result =>
+                {
+                    Debug.Log("Register Completed: " + result.PlayFabId);
+                    onSuccess?.Invoke(result);
+                },
+                error =>
+                {
+                    Debug.Log(error.ErrorMessage);
+                    onFail?.Invoke(error);
+                }
+            );
+        }
     }
 }

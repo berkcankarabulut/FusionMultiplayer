@@ -10,10 +10,19 @@ namespace FPSGame.Networking
     public class RoomList : MonoBehaviourPunCallbacks
     {
         public static RoomList instance;
-        [Header("UI")] [SerializeField] private GameObject _roomListCamera;
-        [SerializeField] private Transform _roomListParent;
-        [SerializeField] private ServerSlot _serverSlot;
-        [SerializeField] private TMP_InputField _roomName;
+
+        [Header("UI")]
+        [SerializeField]
+        private GameObject _roomListCamera;
+
+        [SerializeField]
+        private Transform _roomListParent;
+
+        [SerializeField]
+        private ServerSlot _serverSlot;
+
+        [SerializeField]
+        private TMP_InputField _roomName;
         private List<RoomInfo> cacheroomList = new List<RoomInfo>();
 
         private void Awake()
@@ -42,14 +51,16 @@ namespace FPSGame.Networking
 
         public void CreateOrJoinRoom(string roomName)
         {
-            if (roomName.Trim() == "") roomName = _roomName.text;
-            RoomManager.instance.InitRoom(roomName);
+            if (roomName.Trim() == "")
+                roomName = _roomName.text;
+           RoomManager.instance.InitRoom(roomName);
             _roomListCamera.SetActive(false);
         }
 
         public override void OnRoomListUpdate(List<RoomInfo> roomList)
         {
-            if (cacheroomList.Count == 0) cacheroomList = roomList;
+            if (cacheroomList.Count == 0)
+                cacheroomList = roomList;
             else
             {
                 foreach (var room in roomList)

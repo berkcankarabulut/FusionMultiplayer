@@ -1,5 +1,7 @@
 using System;
+using System.Threading.Tasks;
 using FPSGame.Player;
+using FPSGame.PlayFab;
 using Photon.Pun;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
@@ -15,8 +17,6 @@ namespace FPSGame.Networking
 
         [Space]
         [Header("Room Settings")]
-        public GameObject cameraGO;
-        public GameObject nameUI;
         public GameObject connectionUI;
 
         [Space]
@@ -39,8 +39,24 @@ namespace FPSGame.Networking
         public void InitRoom(string lobbyName)
         {
             roomName = lobbyName;
-            cameraGO.SetActive(true);
-            nameUI.SetActive(true);
+            connectionUI.SetActive(true);
+            _ = PreparePlayerData();
+        }
+
+        public async Task PreparePlayerData()
+        {
+            string result = await PlayfabManager.Instance.GetUsernameAsync();
+            if (string.IsNullOrEmpty(result))
+            {
+                Debug.LogError("Username not FOUND!");
+            }
+            this.nickName = result;
+            OnReadyToJoin();
+        }
+
+        public void OnReadyToJoin()
+        {
+            PhotonNetwork.JoinOrCreateRoom(roomName, null, null);
         }
 
         public override void OnJoinedRoom()
@@ -48,19 +64,6 @@ namespace FPSGame.Networking
             base.OnJoinedRoom();
             PlayerSpawn();
             leaderBoard.Init();
-        }
-
-        public void JoinRoomButtonPressed()
-        {
-            PhotonNetwork.JoinOrCreateRoom(roomName, null, null);
-            nameUI.SetActive(false);
-            cameraGO.SetActive(false);
-            connectionUI.SetActive(true);
-        }
-
-        public void ChangeNickName(string nickName)
-        {
-            this.nickName = nickName;
         }
 
         public void PlayerSpawn()

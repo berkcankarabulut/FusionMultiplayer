@@ -5,8 +5,11 @@ namespace FPSGame.Networking
 {
     public class ServerSlot : MonoBehaviour
     {
-        [SerializeField] private TextMeshProUGUI _serverNameText;
-        [SerializeField] private TextMeshProUGUI _playerCountText;
+        [SerializeField]
+        private TextMeshProUGUI _serverNameText;
+
+        [SerializeField]
+        private TextMeshProUGUI _playerCountText;
 
         public void Init(string serverName, string playerCount)
         {

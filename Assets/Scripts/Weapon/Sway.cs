@@ -2,11 +2,10 @@ using UnityEngine;
 
 namespace FPSGame.Weapons
 {
-    
-
     public class Sway : MonoBehaviour
     {
-        [Header("Settings")] public float swayClamp = .09f;
+        [Header("Settings")]
+        public float swayClamp = .09f;
         public float swaySmooth = .05f;
 
         private Vector3 origin;
@@ -22,9 +21,11 @@ namespace FPSGame.Weapons
             input.x = Mathf.Clamp(input.x, -swayClamp, swayClamp);
             input.y = Mathf.Clamp(input.y, -swayClamp, swayClamp);
             Vector3 target = new Vector3(-input.x, -input.y, 0);
-            transform.localPosition =
-                Vector3.Lerp(transform.localPosition, target + origin, swaySmooth * Time.deltaTime);
+            transform.localPosition = Vector3.Lerp(
+                transform.localPosition,
+                target + origin,
+                swaySmooth * Time.deltaTime
+            );
         }
     }
-
 }

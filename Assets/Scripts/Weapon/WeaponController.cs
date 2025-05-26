@@ -12,34 +12,37 @@ namespace FPSGame.Weapons
         public int Damage = 5;
         public float fireRate = 1;
         public bool isReloading = false;
-        [Space] 
+
+        [Space]
         [Header("Components")]
         public Camera mainCamera;
         public Animator animator;
-        
-        [Header("VFX")] public GameObject hitVFX;
+
+        [Header("VFX")]
+        public GameObject hitVFX;
         private float nextFire;
 
-        [Header("Ammo")] public int mag = 5;
+        [Header("Ammo")]
+        public int mag = 5;
         public int ammo = 30;
         public int magAmmo = 30;
+
         [Space]
-        
-        [Header("Recoil Settings")] 
-        [Range(0,2)]
+        [Header("Recoil Settings")]
+        [Range(0, 2)]
         public float recoverPercent = 0.7f;
         public float recoilUp = 0.2f;
-        public float recoilBack = 0.2f; 
-        
+        public float recoilBack = 0.2f;
+
         private Vector3 originPosition;
         private Vector3 recoilVelocity = Vector3.zero;
 
         private float recoilLenght;
         private float recoverLenght;
-        
+
         private bool isRecoiling = false;
         private bool isRecovering = false;
-        
+
         [Header("UI")]
         public TextMeshProUGUI magText;
         public TextMeshProUGUI ammoText;
@@ -53,10 +56,11 @@ namespace FPSGame.Weapons
         }
 
         private void Update()
-        { 
-            
-            if(isReloading) return;
-            if (nextFire > 0) nextFire -= Time.deltaTime;
+        {
+            if (isReloading)
+                return;
+            if (nextFire > 0)
+                nextFire -= Time.deltaTime;
 
             if (Input.GetButton("Fire1") && nextFire <= 0 && ammo > 0)
             {
@@ -66,43 +70,63 @@ namespace FPSGame.Weapons
                 ReloadAmmoUI();
             }
 
-            if (Input.GetKeyDown(KeyCode.R) || ammo <= 0) Reload();
-             
-            if(isRecoiling) Recoil();
-            else if(isRecovering) Recover();
+            if (Input.GetKeyDown(KeyCode.R) || ammo <= 0)
+                Reload();
+
+            if (isRecoiling)
+                Recoil();
+            else if (isRecovering)
+                Recover();
         }
 
         private void Recoil()
         {
-            Vector3 finalPosition = new Vector3(originPosition.x, originPosition.y + recoilUp, originPosition.z - recoilBack);
-            
-            transform.localPosition = Vector3.SmoothDamp(transform.localPosition, finalPosition, ref recoilVelocity, recoilLenght);
-            
-            if (transform.localPosition != finalPosition) return;
+            Vector3 finalPosition = new Vector3(
+                originPosition.x,
+                originPosition.y + recoilUp,
+                originPosition.z - recoilBack
+            );
+
+            transform.localPosition = Vector3.SmoothDamp(
+                transform.localPosition,
+                finalPosition,
+                ref recoilVelocity,
+                recoilLenght
+            );
+
+            if (transform.localPosition != finalPosition)
+                return;
             isRecoiling = false;
             isRecovering = true;
         }
-        
+
         private void Recover()
         {
             Vector3 finalPosition = originPosition;
-            transform.localPosition = Vector3.SmoothDamp(transform.localPosition, finalPosition, ref recoilVelocity, recoverLenght);
-            if (transform.localPosition != finalPosition) return;
+            transform.localPosition = Vector3.SmoothDamp(
+                transform.localPosition,
+                finalPosition,
+                ref recoilVelocity,
+                recoverLenght
+            );
+            if (transform.localPosition != finalPosition)
+                return;
             isRecoiling = false;
             isRecovering = false;
         }
-        
+
         void Reload()
         {
-            if (mag <= 0) return;
+            if (mag <= 0)
+                return;
             animator.SetTrigger("onReload");
             isReloading = true;
         }
 
         //Trigger on Animator Event
         public void Reloaded()
-        { 
-            isReloading = false;  
+        {
+            isReloading = false;
             mag--;
             ammo = magAmmo;
             ReloadAmmoUI();
@@ -115,20 +139,23 @@ namespace FPSGame.Weapons
         }
 
         private void Fire()
-        { 
+        {
             isRecoiling = true;
             isRecovering = false;
-            
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition); 
-            RaycastHit hit; 
-            if (!Physics.Raycast(ray.origin, ray.direction, out hit, 100)) return;
+
+            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (!Physics.Raycast(ray.origin, ray.direction, out hit, 100))
+                return;
             PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
-            
+
             Health health = hit.transform.GetComponent<Health>();
-            if (health == null) return;
+            if (health == null)
+                return;
             PhotonNetwork.LocalPlayer.AddScore(Damage);
-            if(Damage >= health._health) RoomManager.instance.AddKill(1); 
-            
+            if (Damage >= health._health)
+                RoomManager.instance.AddKill(1);
+
             hit.transform.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.All, Damage);
         }
     }
