@@ -1,6 +1,6 @@
 using System;
 using FPSGame.Player;
-using Photon.Pun; 
+using Photon.Pun;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 
@@ -12,10 +12,15 @@ namespace FPSGame.Networking
 
         public GameObject player;
         public LeaderBoard leaderBoard;
-        [Space] [Header("Room Settings")] public GameObject cameraGO;
+
+        [Space]
+        [Header("Room Settings")]
+        public GameObject cameraGO;
         public GameObject nameUI;
         public GameObject connectionUI;
-        [Space] public Transform[] playerSpawn;
+
+        [Space]
+        public Transform[] playerSpawn;
 
         private string nickName = "unnamed";
         private string roomName = "Room";
@@ -58,14 +63,19 @@ namespace FPSGame.Networking
             this.nickName = nickName;
         }
 
-
         public void PlayerSpawn()
         {
             Transform spawn = playerSpawn[UnityEngine.Random.Range(0, playerSpawn.Length)];
-            GameObject _player = PhotonNetwork.Instantiate(player.name, spawn.position, Quaternion.identity);
+            GameObject _player = PhotonNetwork.Instantiate(
+                player.name,
+                spawn.position,
+                Quaternion.identity
+            );
             PlayerSetup playerSetup = _player.GetComponent<PlayerSetup>();
             playerSetup.IsLocalPlayer();
-            _player.GetComponent<PhotonView>().RPC("SetupName", RpcTarget.AllBuffered, this.nickName);
+            _player
+                .GetComponent<PhotonView>()
+                .RPC("SetupName", RpcTarget.AllBuffered, this.nickName);
             _player.GetComponent<Health>().isLocalPlayer = true;
             PhotonNetwork.LocalPlayer.NickName = nickName;
         }

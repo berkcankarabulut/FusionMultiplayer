@@ -1,5 +1,28 @@
 {
   "dependencies": {
+    "com.berkcankarabulut.commandhandler": {
+      "version": "https://github.com/berkcankarabulut/CommandHandler.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "e03b9cf0bf828e009485d3ee4931e9f5ceae72ae"
+    },
+    "com.berkcankarabulut.sceneloader": {
+      "version": "https://github.com/berkcankarabulut/SceneLoader.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "d070dc4f90e5bb60e393af2351c3c189f1af86d6"
+    },
+    "com.boxqkrtm.ide.cursor": {
+      "version": "https://github.com/boxqkrtm/com.unity.ide.cursor.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.test-framework": "1.1.9"
+      },
+      "hash": "38fecf55e4fd94ccfe58a92ed8ad1a529ba1694e"
+    },
     "com.unity.collab-proxy": {
       "version": "2.7.1",
       "depth": 0,
