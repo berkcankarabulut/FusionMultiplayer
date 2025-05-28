@@ -23,6 +23,13 @@
       },
       "hash": "38fecf55e4fd94ccfe58a92ed8ad1a529ba1694e"
     },
+    "com.cysharp.unitask": {
+      "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "f213ff497e4ff462a77319cf677cf20cc0860ca9"
+    },
     "com.unity.collab-proxy": {
       "version": "2.7.1",
       "depth": 0,
@@ -79,6 +86,22 @@
     "com.unity.ide.vscode": {
       "version": "1.2.5",
       "depth": 1,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.inputsystem": {
+      "version": "1.7.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.nuget.newtonsoft-json": {
+      "version": "3.2.1",
+      "depth": 0,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"

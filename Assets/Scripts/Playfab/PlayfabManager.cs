@@ -12,10 +12,10 @@ namespace FPSGame.PlayFab
     {
         public static PlayfabManager Instance { get; private set; }
 
-        private LeaderboardService leaderboardService = new LeaderboardService();
-        private AuthService authService = new AuthService();
-        private string currentUsername;
-        private string currentPlayFabId;
+        private LeaderboardService _leaderboardService = new LeaderboardService();
+        private AuthService _authService = new AuthService();
+        private string _currentUsername;
+        private string _currentPlayFabId;
 
         private void Awake()
         {
@@ -32,12 +32,12 @@ namespace FPSGame.PlayFab
         #region Leaderboard
         public void SendLeaderboard(int score)
         {
-            leaderboardService.SendLeaderboard(score);
+            _leaderboardService.SendLeaderboard(score);
         }
 
         public void GetLeaderboard()
         {
-            leaderboardService.GetLeaderboard();
+            _leaderboardService.GetLeaderboard();
         }
         #endregion
 
@@ -52,12 +52,12 @@ namespace FPSGame.PlayFab
         public async Task<LoginUI.AuthResult> LoginWithEmailAsync(string email, string password)
         {
             var tcs = new TaskCompletionSource<LoginUI.AuthResult>();
-            authService.LoginWithEmail(
+            _authService.LoginWithEmail(
                 email,
                 password,
                 loginResult =>
                 {
-                    currentPlayFabId = loginResult.PlayFabId;
+                    _currentPlayFabId = loginResult.PlayFabId;
                     tcs.SetResult(
                         new LoginUI.AuthResult { Success = true, Message = "Login başarılı!" }
                     );
@@ -76,12 +76,12 @@ namespace FPSGame.PlayFab
         )
         {
             var tcs = new TaskCompletionSource<LoginUI.AuthResult>();
-            authService.LoginWithUsername(
+            _authService.LoginWithUsername(
                 username,
                 password,
                 loginResult =>
                 {
-                    currentPlayFabId = loginResult.PlayFabId;
+                    _currentPlayFabId = loginResult.PlayFabId;
                     tcs.SetResult(
                         new LoginUI.AuthResult { Success = true, Message = "Login başarılı!" }
                     );
@@ -101,7 +101,7 @@ namespace FPSGame.PlayFab
         )
         {
             var tcs = new TaskCompletionSource<LoginUI.AuthResult>();
-            authService.RegisterWithEmail(
+            _authService.RegisterWithEmail(
                 email,
                 password,
                 username,
@@ -119,24 +119,24 @@ namespace FPSGame.PlayFab
 
         public async Task<string> GetUsernameAsync()
         {
-            if (!string.IsNullOrEmpty(currentUsername))
-                return currentUsername;
+            if (!string.IsNullOrEmpty(_currentUsername))
+                return _currentUsername;
 
-            Debug.Log("currentPlayFabId:" + currentPlayFabId);
-            if (string.IsNullOrEmpty(currentPlayFabId))
+            Debug.Log("currentPlayFabId:" + _currentPlayFabId);
+            if (string.IsNullOrEmpty(_currentPlayFabId))
             {
                 Debug.LogWarning("No PlayFabId available. User might not be logged in.");
                 return null;
             }
             var tcs = new TaskCompletionSource<string>();
-            var request = new GetAccountInfoRequest { PlayFabId = currentPlayFabId };
+            var request = new GetAccountInfoRequest { PlayFabId = _currentPlayFabId };
             PlayFabClientAPI.GetAccountInfo(
                 request,
                 result =>
                 {
-                    currentUsername =
+                    _currentUsername =
                         result.AccountInfo?.Username ?? result.AccountInfo?.TitleInfo?.DisplayName;
-                    tcs.SetResult(currentUsername);
+                    tcs.SetResult(_currentUsername);
                 },
                 error =>
                 {

@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
+using FPSGame.Input;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using TMPro;
-using UnityEngine;
+using UnityEngine; 
 
 namespace FPSGame.Networking
 {
@@ -17,6 +18,25 @@ namespace FPSGame.Networking
         [Header("UI Elements")]
         [SerializeField]
         private LeaderboardSlot[] _leaderboardSlots;
+
+        [Header("Input")]
+        [SerializeField]
+        private GameplayInputActions _inputActions;
+
+        private void Start()
+        {
+            _inputActions = InputManager.Instance.InputActions;
+            _inputActions.Player.Enable();
+        }
+
+        private void OnDestroy()
+        {
+            if (_inputActions != null)
+            {
+                _inputActions.Player.Disable();
+                _inputActions?.Dispose();
+            }
+        }
 
         public void Init()
         {
@@ -59,15 +79,15 @@ namespace FPSGame.Networking
                         .CustomProperties["deaths"]
                         .ToString();
                 else
-                    _leaderboardSlots[i].killText.text = "0";
+                    _leaderboardSlots[i].deathText.text = "0";
 
                 i++;
             }
         }
 
         private void Update()
-        {
-            playersHolder.SetActive(Input.GetKey(KeyCode.Tab));
+        { 
+            playersHolder.SetActive(_inputActions.Player.Scoreboard.IsPressed());
         }
     }
 

@@ -1,22 +1,18 @@
-using System;
-using System.Threading.Tasks;
 using SceneLoadSystem.Runtime;
 using TMPro;
-using UnityEngine;
+using UnityEngine; 
 using UnityEngine.UI;
 
 namespace FPSGame.PlayFab
 {
     public class LoginUI : MonoBehaviour
     {
-        public TMP_InputField emailOrUsernameInput;
-        public TMP_InputField passwordInput;
-        public Button loginButton;
-        public Button registerButton;
-        public TextMeshProUGUI infoText;
-
-        [SerializeField]
-        private SceneLoader _sceneLoader;
+        [SerializeField] private TMP_InputField _emailOrUsernameInput;
+        [SerializeField] private TMP_InputField _passwordInput;
+        [SerializeField] private Button _loginButton;
+        [SerializeField] private Button _registerButton;
+        [SerializeField] private TextMeshProUGUI _infoText; 
+        [SerializeField] private SceneLoader _sceneLoader;
 
         public struct AuthResult
         {
@@ -26,29 +22,24 @@ namespace FPSGame.PlayFab
 
         private void OnEnable()
         {
-            loginButton.onClick.AddListener(OnLoginClicked);
-            registerButton.onClick.AddListener(OnRegisterClicked);
+            _loginButton.onClick.AddListener(OnLoginClicked);
+            _registerButton.onClick.AddListener(OnRegisterClicked);
         }
 
         private void OnDisable()
         {
-            loginButton.onClick.RemoveListener(OnLoginClicked);
-            registerButton.onClick.RemoveListener(OnRegisterClicked);
-        }
-
-        private void OnRegisterResult(string message)
-        {
-            infoText.text = message;
-        }
+            _loginButton.onClick.RemoveListener(OnLoginClicked);
+            _registerButton.onClick.RemoveListener(OnRegisterClicked);
+        } 
 
         private async void OnRegisterClicked()
         {
-            string user = emailOrUsernameInput.text;
-            string pass = passwordInput.text;
+            string user = _emailOrUsernameInput.text;
+            string pass = _passwordInput.text;
 
             if (!user.Contains("@"))
             {
-                infoText.text = "Enter Email!";
+                _infoText.text = "Enter Email!";
                 return;
             }
 
@@ -61,7 +52,7 @@ namespace FPSGame.PlayFab
 
             if (!registerResult.Success)
             {
-                infoText.text = registerResult.Message;
+                _infoText.text = registerResult.Message;
                 return;
             }
 
@@ -74,8 +65,8 @@ namespace FPSGame.PlayFab
 
         private async void OnLoginClicked()
         {
-            string user = emailOrUsernameInput.text;
-            string pass = passwordInput.text;
+            string user = _emailOrUsernameInput.text;
+            string pass = _passwordInput.text;
 
             AuthResult result;
             if (user.Contains("@"))
@@ -90,7 +81,7 @@ namespace FPSGame.PlayFab
 
         private void SetInfo(string info)
         {
-            infoText.text = info.ToString();
+            _infoText.text = info.ToString();
         }
 
         private void OnSuccessLogin()

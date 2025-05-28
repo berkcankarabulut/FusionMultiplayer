@@ -1,162 +1,227 @@
-using FPSGame.Networking;
-using FPSGame.Player;
+using System;
+using FPSGame.Input;
 using Photon.Pun;
 using Photon.Pun.UtilityScripts;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace FPSGame.Weapons
 {
     public class WeaponController : MonoBehaviour
     {
-        public int Damage = 5;
-        public float fireRate = 1;
-        public bool isReloading = false;
+        [SerializeField] private WeaponData _weaponData = new WeaponData();
+        public WeaponData WeaponData => _weaponData;
 
-        [Space]
-        [Header("Components")]
-        public Camera mainCamera;
-        public Animator animator;
+        [Header("Components")] [SerializeField]
+        private Camera _mainCamera;
 
-        [Header("VFX")]
-        public GameObject hitVFX;
-        private float nextFire;
+        [SerializeField] private Animator _animator;
+        [SerializeField] private GameObject _hitVFX;
+        [SerializeField] private Transform _weaponModel;
 
-        [Header("Ammo")]
-        public int mag = 5;
-        public int ammo = 30;
-        public int magAmmo = 30;
+        [Header("Weapon Sway Settings")] [SerializeField]
+        private WeaponSwaySettings _swaySettings = new WeaponSwaySettings();
 
-        [Space]
-        [Header("Recoil Settings")]
-        [Range(0, 2)]
-        public float recoverPercent = 0.7f;
-        public float recoilUp = 0.2f;
-        public float recoilBack = 0.2f;
+        [SerializeField] private bool _enableBreathing = true;
+        [SerializeField] private bool _enableWalkingSway = true;
 
-        private Vector3 originPosition;
-        private Vector3 recoilVelocity = Vector3.zero;
+        [Header("Ammo Configuration")] [SerializeField]
+        private WeaponAmmo _ammoSystem = new WeaponAmmo();
 
-        private float recoilLenght;
-        private float recoverLenght;
+        [Header("UI")] [SerializeField] private TextMeshProUGUI _magText;
+        [SerializeField] private TextMeshProUGUI _ammoText;
 
-        private bool isRecoiling = false;
-        private bool isRecovering = false;
 
-        [Header("UI")]
-        public TextMeshProUGUI magText;
-        public TextMeshProUGUI ammoText;
+        public bool HasAmmo => _ammoSystem.HasAmmo;
+        public bool IsReloading => _reloadSystem.IsReloading;
+        public bool CanFire => _fireSystem.CanFire && !_reloadSystem.IsReloading;
+        public FireMode CurrentFireMode => _fireSystem.CurrentFireMode;
+        private bool _isAiming = false;
+
+        public bool IsAiming
+        {
+            get => _isAiming;
+            set => _isAiming = value;
+        }
+
+        private WeaponFireSystem _fireSystem;
+        private WeaponReloadSystem _reloadSystem;
+        private WeaponCombatSystem _combatSystem;
+        private WeaponSwaySystem _swaySystem;
+        private WeaponRecoilSystem _recoilSystem;
+
+        private Vector3 _originalWeaponPosition;
 
         private void Start()
         {
-            ReloadAmmoUI();
-            originPosition = transform.localPosition;
-            recoilLenght = 0;
-            recoverLenght = 1 / fireRate * recoverPercent;
+            if (_weaponModel == null)
+                _weaponModel = this.transform;
+
+            if (_mainCamera == null)
+                _mainCamera = Camera.main;
+
+            _originalWeaponPosition = _weaponModel.localPosition;
+
+            InitializeSystems();
+            SetupEvents();
+            UpdateAmmoUI();
+        }
+
+        private void InitializeSystems()
+        {
+            _fireSystem = new WeaponFireSystem(WeaponData.FireRate, WeaponData.FireMode);
+            _reloadSystem = new WeaponReloadSystem(_animator);
+            _combatSystem = new WeaponCombatSystem(_mainCamera, WeaponData.Damage, WeaponData.Range);
+
+            _swaySystem = new WeaponSwaySystem(
+                _weaponModel,
+                _swaySettings,
+                _enableBreathing,
+                _enableWalkingSway
+            );
+
+            _recoilSystem = new WeaponRecoilSystem(
+                _weaponModel,
+                WeaponData.RecoilUp,
+                WeaponData.RecoilBack,
+                WeaponData.RecoverTime
+            );
+        }
+
+        private void SetupEvents()
+        {
+            _ammoSystem.OnAmmoChanged += UpdateAmmoUI;
+            _ammoSystem.OnMagChanged += UpdateMagUI;
+
+            _reloadSystem.OnReloadComplete += OnReloadComplete;
+
+            _combatSystem.OnHit += OnWeaponHit;
+            _combatSystem.OnDamageDealt += OnDamageDealt;
+        }
+
+        private void OnEnable()
+        {
+            if (InputManager.Instance != null)
+            {
+                InputManager.Instance.InputActions.Player.Reload.performed += OnReloadInput;
+            }
+        }
+
+        private void OnDisable()
+        {
+            if (InputManager.Instance != null)
+            {
+                InputManager.Instance.InputActions.Player.Reload.performed -= OnReloadInput;
+            }
         }
 
         private void Update()
         {
-            if (isReloading)
-                return;
-            if (nextFire > 0)
-                nextFire -= Time.deltaTime;
+            if (InputManager.Instance == null) return;
 
-            if (Input.GetButton("Fire1") && nextFire <= 0 && ammo > 0)
+            HandleFiring();
+            HandleAutoReload();
+            UpdateWeaponEffects();
+        }
+
+        private void HandleFiring()
+        {
+            if (_reloadSystem.IsReloading) return;
+
+            bool isFirePressed = InputManager.Instance.IsFirePressed;
+            bool canFire = _fireSystem.CanFireWithMode(isFirePressed) && _ammoSystem.HasAmmo;
+
+            if (canFire)
             {
-                nextFire = 1 / fireRate;
-                Fire();
-                ammo--;
-                ReloadAmmoUI();
+                ExecuteShot();
             }
-
-            if (Input.GetKeyDown(KeyCode.R) || ammo <= 0)
-                Reload();
-
-            if (isRecoiling)
-                Recoil();
-            else if (isRecovering)
-                Recover();
         }
 
-        private void Recoil()
+        private void ExecuteShot()
         {
-            Vector3 finalPosition = new Vector3(
-                originPosition.x,
-                originPosition.y + recoilUp,
-                originPosition.z - recoilBack
-            );
+            _fireSystem.Fire();
+            _ammoSystem.ConsumeAmmo();
+            _combatSystem.TryShoot();
 
-            transform.localPosition = Vector3.SmoothDamp(
-                transform.localPosition,
-                finalPosition,
-                ref recoilVelocity,
-                recoilLenght
-            );
-
-            if (transform.localPosition != finalPosition)
-                return;
-            isRecoiling = false;
-            isRecovering = true;
+            _recoilSystem.StartRecoil();
         }
 
-        private void Recover()
+        private void HandleAutoReload()
         {
-            Vector3 finalPosition = originPosition;
-            transform.localPosition = Vector3.SmoothDamp(
-                transform.localPosition,
-                finalPosition,
-                ref recoilVelocity,
-                recoverLenght
-            );
-            if (transform.localPosition != finalPosition)
-                return;
-            isRecoiling = false;
-            isRecovering = false;
+            if (_ammoSystem.IsEmpty && _ammoSystem.HasMags && !_reloadSystem.IsReloading)
+            {
+                _reloadSystem.StartReload();
+            }
         }
 
-        void Reload()
+        private void UpdateWeaponEffects()
         {
-            if (mag <= 0)
-                return;
-            animator.SetTrigger("onReload");
-            isReloading = true;
+            if (InputManager.Instance == null) return;
+
+            Vector2 mouseInput = InputManager.Instance.LookInput;
+            Vector2 movementInput = InputManager.Instance.MoveInput;
+
+            _recoilSystem?.Update();
+
+            if (!_recoilSystem.IsActive)
+            {
+                _swaySystem?.Update(mouseInput, movementInput);
+            }
         }
 
-        //Trigger on Animator Event
-        public void Reloaded()
+        private void OnReloadInput(InputAction.CallbackContext context)
         {
-            isReloading = false;
-            mag--;
-            ammo = magAmmo;
-            ReloadAmmoUI();
+            TryReload();
         }
 
-        private void ReloadAmmoUI()
+        private void TryReload()
         {
-            magText.text = mag.ToString();
-            ammoText.text = ammo + "/" + magAmmo;
+            if (!_reloadSystem.IsReloading && _ammoSystem.HasMags && !_ammoSystem.IsFull)
+            {
+                _reloadSystem.StartReload();
+            }
         }
 
-        private void Fire()
+        private void OnReloadComplete()
         {
-            isRecoiling = true;
-            isRecovering = false;
-
-            Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (!Physics.Raycast(ray.origin, ray.direction, out hit, 100))
-                return;
-            PhotonNetwork.Instantiate(hitVFX.name, hit.point, Quaternion.identity);
-
-            Health health = hit.transform.GetComponent<Health>();
-            if (health == null)
-                return;
-            PhotonNetwork.LocalPlayer.AddScore(Damage);
-            if (Damage >= health._health)
-                RoomManager.instance.AddKill(1);
-
-            hit.transform.GetComponent<PhotonView>().RPC("TakeDamage", RpcTarget.All, Damage);
+            _ammoSystem.TryReload();
         }
+
+        private void OnWeaponHit(Vector3 hitPoint)
+        {
+            if (_hitVFX != null)
+            {
+                PhotonNetwork.Instantiate(_hitVFX.name, hitPoint, Quaternion.identity);
+            }
+        }
+
+        private void OnDamageDealt(int damage)
+        {
+            PhotonNetwork.LocalPlayer.AddScore(damage);
+        }
+
+        private void UpdateAmmoUI(int currentAmmo, int maxAmmo)
+        {
+            if (_ammoText != null)
+                _ammoText.text = $"{currentAmmo}/{maxAmmo}";
+        }
+
+        private void UpdateAmmoUI()
+        {
+            UpdateAmmoUI(_ammoSystem.CurrentAmmo, _ammoSystem.MagCapacity);
+        }
+
+        private void UpdateMagUI(int totalMags)
+        {
+            if (_magText != null)
+                _magText.text = totalMags.ToString();
+        }
+
+        public void OnReloadAnimationComplete()
+        {
+            _reloadSystem.CompleteReload();
+        } 
+ 
     }
 }

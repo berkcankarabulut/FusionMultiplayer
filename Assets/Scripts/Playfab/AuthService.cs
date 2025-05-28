@@ -18,8 +18,7 @@ namespace FPSGame.PlayFab
             PlayFabClientAPI.LoginWithEmailAddress(
                 request,
                 result =>
-                {
-                    Debug.Log(result.PlayFabId + " logged in");
+                { 
                     onSuccess?.Invoke(result);
                 },
                 error =>
@@ -41,8 +40,7 @@ namespace FPSGame.PlayFab
             PlayFabClientAPI.LoginWithPlayFab(
                 request,
                 result =>
-                {
-                    Debug.Log(result.PlayFabId + " logged in");
+                { 
                     onSuccess?.Invoke(result);
                 },
                 error =>
@@ -71,8 +69,7 @@ namespace FPSGame.PlayFab
             PlayFabClientAPI.RegisterPlayFabUser(
                 request,
                 result =>
-                {
-                    Debug.Log("Register Completed: " + result.PlayFabId);
+                { 
                     onSuccess?.Invoke(result);
                 },
                 error =>

@@ -1,78 +1,80 @@
-﻿using UnityEngine;
+﻿using FPSGame.Input;
+using UnityEngine;
 
 namespace FPSGame.Player
 {
     public class MouseLook : MonoBehaviour
     {
-        [Header("Settings")] public Vector2 clampInDegrees = new Vector2(360, 180);
-        public bool lockCursor = true;
-        [Space] private Vector2 sensitivity = new Vector2(2, 2);
-        [Space] public Vector2 smoothing = new Vector2(3, 3);
+        [Header("Settings")] [Space] [SerializeField]
+        private Vector2 _clampInDegrees = new Vector2(360, 180);
+
+        [Space] [SerializeField] private bool _lockCursor = true;
+        [Space] [SerializeField] private Vector2 _smoothing = new Vector2(3, 3);
 
         [Header("First Person")] public GameObject characterBody;
-
-        private Vector2 targetDirection;
-        private Vector2 targetCharacterDirection;
+        
+        private GameplayInputActions _inputActions;
+        private Vector2 _targetDirection;
+        private Vector2 _targetCharacterDirection;
 
         private Vector2 _mouseAbsolute;
         private Vector2 _smoothMouse;
 
-        private Vector2 mouseDelta;
-
-        [HideInInspector] public bool scoped;
+        private Vector2 _mouseDelta;
+        
 
         void Start()
         {
-            // Set target direction to the camera's initial orientation.
-            targetDirection = transform.localRotation.eulerAngles;
+            _inputActions = InputManager.Instance.InputActions;
+            _inputActions.Player.Enable();
 
-            // Set target direction for the character body to its inital state.
+            _targetDirection = transform.localRotation.eulerAngles;
+
             if (characterBody)
-                targetCharacterDirection = characterBody.transform.localRotation.eulerAngles;
+                _targetCharacterDirection = characterBody.transform.localRotation.eulerAngles;
 
-            if (lockCursor)
+            if (_lockCursor)
                 LockCursor();
         }
 
-        public void LockCursor()
+        private void OnDestroy()
         {
-            // make the cursor hidden and locked
+            if (_inputActions == null) return;
+            _inputActions.Player.Disable();
+            _inputActions?.Dispose();
+        }
+
+        private void LockCursor()
+        {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
 
         void Update()
         {
-            // Allow the script to clamp based on a desired target value.
-            var targetOrientation = Quaternion.Euler(targetDirection);
-            var targetCharacterOrientation = Quaternion.Euler(targetCharacterDirection);
+            var targetOrientation = Quaternion.Euler(_targetDirection);
+            var targetCharacterOrientation = Quaternion.Euler(_targetCharacterDirection);
 
-            // Get raw mouse input for a cleaner reading on more sensitive mice.
-            mouseDelta = new Vector2(Input.GetAxisRaw("Mouse X"), Input.GetAxisRaw("Mouse Y"));
+            Vector2 mouseInput = _inputActions.Player.Look.ReadValue<Vector2>();
 
-            // Scale input against the sensitivity setting and multiply that against the smoothing value.
-            mouseDelta = Vector2.Scale(mouseDelta,
-                new Vector2(sensitivity.x * smoothing.x, sensitivity.y * smoothing.y));
+            _mouseDelta = mouseInput * Time.deltaTime;
 
-            // Interpolate mouse movement over time to apply smoothing delta.
-            _smoothMouse.x = Mathf.Lerp(_smoothMouse.x, mouseDelta.x, 1f / smoothing.x);
-            _smoothMouse.y = Mathf.Lerp(_smoothMouse.y, mouseDelta.y, 1f / smoothing.y);
+            _mouseDelta = Vector2.Scale(_mouseDelta,
+                new Vector2(_smoothing.x, _smoothing.y));
 
-            // Find the absolute mouse movement value from point zero.
+            _smoothMouse.x = Mathf.Lerp(_smoothMouse.x, _mouseDelta.x, 1f / _smoothing.x);
+            _smoothMouse.y = Mathf.Lerp(_smoothMouse.y, _mouseDelta.y, 1f / _smoothing.y);
+
             _mouseAbsolute += _smoothMouse;
+            if (_clampInDegrees.x < 360)
+                _mouseAbsolute.x = Mathf.Clamp(_mouseAbsolute.x, -_clampInDegrees.x * 0.5f, _clampInDegrees.x * 0.5f);
 
-            // Clamp and apply the local x value first, so as not to be affected by world transforms.
-            if (clampInDegrees.x < 360)
-                _mouseAbsolute.x = Mathf.Clamp(_mouseAbsolute.x, -clampInDegrees.x * 0.5f, clampInDegrees.x * 0.5f);
-
-            // Then clamp and apply the global y value.
-            if (clampInDegrees.y < 360)
-                _mouseAbsolute.y = Mathf.Clamp(_mouseAbsolute.y, -clampInDegrees.y * 0.5f, clampInDegrees.y * 0.5f);
+            if (_clampInDegrees.y < 360)
+                _mouseAbsolute.y = Mathf.Clamp(_mouseAbsolute.y, -_clampInDegrees.y * 0.5f, _clampInDegrees.y * 0.5f);
 
             transform.localRotation = Quaternion.AngleAxis(-_mouseAbsolute.y, targetOrientation * Vector3.right) *
                                       targetOrientation;
 
-            // If there's a character body that acts as a parent to the camera
             if (characterBody)
             {
                 var yRotation = Quaternion.AngleAxis(_mouseAbsolute.x, Vector3.up);

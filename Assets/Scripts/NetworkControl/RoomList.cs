@@ -11,18 +11,13 @@ namespace FPSGame.Networking
     {
         public static RoomList instance;
 
-        [Header("UI")]
-        [SerializeField]
-        private GameObject _roomListCamera;
+        [Header("UI")] [SerializeField] private GameObject _roomListCamera;
 
-        [SerializeField]
-        private Transform _roomListParent;
+        [SerializeField] private Transform _roomListParent;
 
-        [SerializeField]
-        private ServerSlot _serverSlot;
+        [SerializeField] private ServerSlot _serverSlot;
 
-        [SerializeField]
-        private TMP_InputField _roomName;
+        [SerializeField] private TMP_InputField _roomName;
         private List<RoomInfo> cacheroomList = new List<RoomInfo>();
 
         private void Awake()
@@ -53,7 +48,7 @@ namespace FPSGame.Networking
         {
             if (roomName.Trim() == "")
                 roomName = _roomName.text;
-           RoomManager.instance.InitRoom(roomName);
+            RoomManager.instance.InitRoom(roomName);
             _roomListCamera.SetActive(false);
         }
 

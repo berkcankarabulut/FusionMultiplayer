@@ -1550,7 +1550,6 @@ GameObject:
   - component: {fileID: 3865393720875826730}
   - component: {fileID: 1972063855144226526}
   - component: {fileID: 1836717163240670961}
-  - component: {fileID: 7285863687757414339}
   m_Layer: 0
   m_Name: AK
   m_TagString: Untagged
@@ -1610,34 +1609,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 607275155f314c239f2ccd34fd55a672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Damage: 5
-  fireRate: 10
-  isReloading: 0
-  mainCamera: {fileID: 0}
-  animator: {fileID: 1972063855144226526}
-  hitVFX: {fileID: 2708598583397607911, guid: 6398d43fe79ea0140913dc5530c646af, type: 3}
-  mag: 5
-  ammo: 30
-  magAmmo: 30
-  recoverPercent: 0.7
-  recoilUp: 0.02
-  recoilBack: 0.02
-  magText: {fileID: 0}
-  ammoText: {fileID: 0}
---- !u!114 &7285863687757414339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4534970552143864976}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 25d879498b702f54eba09fef4c65ce40, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  swayClamp: 0.1
-  swaySmooth: 1
+  _weaponData:
+    _damage: 5
+    _fireRate: 10
+    _range: 100
+    _fireMode: 1
+    _recoilUp: 0.05
+    _recoilBack: 0.05
+    _recoverTime: 0.3
+  _mainCamera: {fileID: 0}
+  _animator: {fileID: 1972063855144226526}
+  _hitVFX: {fileID: 2708598583397607911, guid: 6398d43fe79ea0140913dc5530c646af, type: 3}
+  _weaponModel: {fileID: 3865393720875826730}
+  _swaySettings:
+    swayClamp: 0.09
+    swaySmooth: 0.5
+    swayIntensity: 1
+    aimingMultiplier: 0.3
+    breathingIntensity: 0.00405
+    breathingSpeed: 1
+    walkingSwayIntensity: 0.003
+    walkingSwaySpeed: 1.5
+    verticalMultiplier: 0.5
+    horizontalMultiplier: 0.5
+    invertHorizontal: 0
+    invertVertical: 0
+  _enableBreathing: 1
+  _enableWalkingSway: 1
+  _ammoSystem:
+    _currentAmmo: 30
+    _magCapacity: 30
+    _totalMags: 5
+  _magText: {fileID: 0}
+  _ammoText: {fileID: 0}
 --- !u!1 &4675989504715690864
 GameObject:
   m_ObjectHideFlags: 0

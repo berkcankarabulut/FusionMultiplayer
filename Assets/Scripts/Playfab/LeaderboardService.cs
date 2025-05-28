@@ -8,11 +8,8 @@ namespace FPSGame.PlayFab
 {
     public class LeaderboardService
     {
-        public void SendLeaderboard(
-            int score,
-            Action<UpdatePlayerStatisticsResult> onSuccess = null,
-            Action<PlayFabError> onFail = null
-        )
+        public void SendLeaderboard(int score,
+            Action<UpdatePlayerStatisticsResult> onSuccess = null, Action<PlayFabError> onFail = null)
         {
             var request = new UpdatePlayerStatisticsRequest
             {
@@ -24,8 +21,7 @@ namespace FPSGame.PlayFab
             PlayFabClientAPI.UpdatePlayerStatistics(
                 request,
                 result =>
-                {
-                    Debug.Log("Leaderboard updated");
+                { 
                     onSuccess?.Invoke(result);
                 },
                 error =>
@@ -36,10 +32,7 @@ namespace FPSGame.PlayFab
             );
         }
 
-        public void GetLeaderboard(
-            Action<GetLeaderboardResult> onSuccess = null,
-            Action<PlayFabError> onFail = null
-        )
+        public void GetLeaderboard(Action<GetLeaderboardResult> onSuccess = null, Action<PlayFabError> onFail = null)
         {
             var request = new GetLeaderboardRequest
             {
@@ -50,12 +43,12 @@ namespace FPSGame.PlayFab
             PlayFabClientAPI.GetLeaderboard(
                 request,
                 result =>
-                {
-                    Debug.Log("Leaderboard retrieved");
+                { 
                     foreach (var item in result.Leaderboard)
                     {
                         Debug.Log(item.DisplayName + " " + item.StatValue);
                     }
+
                     onSuccess?.Invoke(result);
                 },
                 error =>
