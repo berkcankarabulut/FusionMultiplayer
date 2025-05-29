@@ -1,4 +1,5 @@
 using System;
+using Photon.Pun;
 using UnityEngine;
 
 namespace FPSGame.Weapons
@@ -22,11 +23,20 @@ namespace FPSGame.Weapons
         public bool TryShoot()
         {
             Ray ray = new Ray(_camera.transform.position, _camera.transform.forward);
+
+            if (!Physics.Raycast(ray, out RaycastHit hit, _range)) return false;
             
-            if (Physics.Raycast(ray, out RaycastHit hit, _range))
-            {
-                OnHit?.Invoke(hit.point);
-                
+            OnHit?.Invoke(hit.point);
+ 
+            var photonView = hit.transform.GetComponent<PhotonView>();
+            if (photonView != null)
+            { 
+                photonView.RPC("TakeDamage", RpcTarget.All, _damage);
+                OnDamageDealt?.Invoke(_damage);
+                return true;
+            }
+            else
+            { 
                 var target = hit.transform.GetComponent<IWeaponTarget>();
                 if (target != null && target.TryDamage(_damage))
                 {
@@ -34,7 +44,7 @@ namespace FPSGame.Weapons
                     return true;
                 }
             }
-            
+
             return false;
         }
     }

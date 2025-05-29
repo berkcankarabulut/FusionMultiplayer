@@ -15,7 +15,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5236435622534899883
 RectTransform:
   m_ObjectHideFlags: 0
@@ -23,14 +23,14 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 189012858525752545}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.16, y: 0.16, z: 0.16}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7084918774936345612}
   m_Father: {fileID: 7485944869183468493}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 1.276}
@@ -398,7 +398,7 @@ GameObject:
   - component: {fileID: 7084918774936345612}
   - component: {fileID: 7972032737596997993}
   - component: {fileID: 8170870816700973675}
-  - component: {fileID: 6276404334878736875}
+  - component: {fileID: 8818166258406658729}
   m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
@@ -423,7 +423,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 5}
+  m_SizeDelta: {x: 14.65, y: 3.5}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &7972032737596997993
 MeshRenderer:
@@ -517,7 +517,7 @@ MonoBehaviour:
   m_fontSize: 36
   m_fontSizeBase: 36
   m_fontWeight: 400
-  m_enableAutoSizing: 0
+  m_enableAutoSizing: 1
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
@@ -559,7 +559,7 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_renderer: {fileID: 7972032737596997993}
   m_maskType: 0
---- !u!114 &6276404334878736875
+--- !u!114 &8818166258406658729
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -571,6 +571,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9ccb0780f37bd214db94f27c7d49db73, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _lookAtCamera: 1
+  _reverseDirection: 1
+  _offset: {x: 0, y: 0, z: 0}
 --- !u!1 &5161533344719008616
 GameObject:
   m_ObjectHideFlags: 0
@@ -1144,7 +1147,7 @@ MonoBehaviour:
   _moveController: {fileID: 5801850752992491309}
   _mouseLook: {fileID: 6144216415547346330}
   _playerCamera: {fileID: 5780743238935666642}
-  __nicknameText: {fileID: 8170870816700973675}
+  _nicknameText: {fileID: 8170870816700973675}
   _photonView: {fileID: 3176969715838978389}
   _playerUI: {fileID: 6640037064194159219}
   _tpWeaponHolder: {fileID: 1641996269861384291}

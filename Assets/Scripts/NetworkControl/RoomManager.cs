@@ -18,9 +18,9 @@ namespace FPSGame.Networking
  
         [Space]
         [Header("Room Settings")]
-        [SerializeField] private  GameObject _connectionUI; 
+        [SerializeField] private GameObject _connectionUI; 
         [Space]
-        [SerializeField] private  Transform[] _playerSpawn;
+        [SerializeField] private Transform[] _playerSpawn;
 
         private string _nickName = "unnamed";
         private string _roomName = "Room";
@@ -28,7 +28,6 @@ namespace FPSGame.Networking
         private int _deaths = 0;
 
         public int Kills => _kills;
-
         public int Deaths => _deaths;
 
         private void Awake()
@@ -43,46 +42,77 @@ namespace FPSGame.Networking
             _ = PreparePlayerData();
         }
 
-        public async UniTask PreparePlayerData()
+        private async UniTaskVoid PreparePlayerData()
         {
             string result = await PlayfabManager.Instance.GetUsernameAsync();
             if (string.IsNullOrEmpty(result))
             {
                 Debug.LogError("Username not FOUND!");
+                // Fallback nickname
+                _nickName = "Player" + UnityEngine.Random.Range(1000, 9999);
             }
-            this._nickName = result;
+            else
+            {
+                _nickName = result;
+            }
+            
+            Debug.Log($"Prepared nickname: {_nickName}");
             OnReadyToJoin();
         }
 
-        public void OnReadyToJoin()
+        private void OnReadyToJoin()
         {
+            // PhotonNetwork nickname'ini ayarla
+            PhotonNetwork.NickName = _nickName;
             PhotonNetwork.JoinOrCreateRoom(_roomName, null, null);
         }
 
         public override void OnJoinedRoom()
         {
             base.OnJoinedRoom();
+            Debug.Log($"Joined room with nickname: {PhotonNetwork.NickName}");
             PlayerSpawn();
             _leaderBoard.Init();
         }
 
         public void PlayerSpawn()
         {
+            Debug.Log("PlayerSpawn called");
+    
             Transform spawn = _playerSpawn[UnityEngine.Random.Range(0, _playerSpawn.Length)];
-            GameObject _player = PhotonNetwork.Instantiate(
-                this._player.name,
+            GameObject playerObj = PhotonNetwork.Instantiate(
+                _player.name,
                 spawn.position,
                 Quaternion.identity
             );
-            PlayerSetup playerSetup = _player.GetComponent<PlayerSetup>();
-            playerSetup.IsLocalPlayer();
-            _player
-                .GetComponent<PhotonView>()
-                .RPC("SetupName", RpcTarget.AllBuffered, this._nickName); 
-            PhotonNetwork.LocalPlayer.NickName = _nickName;
+    
+            PlayerSetup playerSetup = playerObj.GetComponent<PlayerSetup>();
+            if (playerSetup != null)
+            {
+                // Setup'ı başlat
+                playerSetup.IsLocalPlayer();
+        
+                // Nickname'i hemen ayarla (AllBuffered ile tüm oyunculara gönder)
+                PhotonView playerPhotonView = playerObj.GetComponent<PhotonView>();
+                if (playerPhotonView != null)
+                {
+                    Debug.Log($"Sending SetupName RPC with nickname: {_nickName}");
+                    playerPhotonView.RPC("SetupName", RpcTarget.AllBuffered, _nickName);
+                }
+                else
+                {
+                    Debug.LogError("PhotonView component not found on player!");
+                }
+        
+                Debug.Log($"Player spawned and setup completed for: {_nickName}");
+            }
+            else
+            {
+                Debug.LogError("PlayerSetup component not found on spawned player!");
+            }
         }
 
-        public void SetHashes()
+        private void SetHashes()
         {
             try
             {
@@ -93,8 +123,7 @@ namespace FPSGame.Networking
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
-                throw;
+                Debug.LogError($"Error setting hashes: {e.Message}");
             }
         }
 

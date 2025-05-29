@@ -21,13 +21,11 @@ namespace FPSGame.Player
         private Vector2 _smoothMouse;
 
         private Vector2 _mouseDelta;
-        
 
-        void Start()
+
+        public void Init()
         {
-            _inputActions = InputManager.Instance.InputActions;
-            _inputActions.Player.Enable();
-
+            _inputActions = InputManager.Instance.InputActions; 
             _targetDirection = transform.localRotation.eulerAngles;
 
             if (characterBody)
@@ -36,13 +34,7 @@ namespace FPSGame.Player
             if (_lockCursor)
                 LockCursor();
         }
-
-        private void OnDestroy()
-        {
-            if (_inputActions == null) return;
-            _inputActions.Player.Disable();
-            _inputActions?.Dispose();
-        }
+ 
 
         private void LockCursor()
         {

@@ -1,70 +1,139 @@
-using System;
 using FPSGame.Input;
 using FPSGame.Weapons;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace FPSGame.Player
 {
     public class PlayerSetup : MonoBehaviour
     {
-        [Header("Player Components")]
-        [SerializeField] private Health _health;
+        [Header("Player Components")] [SerializeField]
+        private Health _health;
+
         [SerializeField] private MoveController _moveController;
         [SerializeField] private MouseLook _mouseLook;
         [SerializeField] private GameObject _playerCamera;
-        [SerializeField] private TextMeshPro __nicknameText;
+        [SerializeField] private TextMeshPro _nicknameText;  
         [SerializeField] private PhotonView _photonView;
         [SerializeField] private GameObject _playerUI;
         [SerializeField] private Transform _tpWeaponHolder;
-        
-        [Header("Weapon Components")]
-        [SerializeField] private WeaponController[] _weaponControllers;
+
+        [Header("Weapon Components")] [SerializeField]
+        private WeaponController[] _weaponControllers;
+
         [SerializeField] private WeaponSwitcher _weaponSwitcher;
 
         private string _nickName;
         private bool _isLocalPlayer = false;
 
+        private void Start()
+        {
+            IsLocalPlayer();
+        }
+
         public void IsLocalPlayer()
         {
-            _isLocalPlayer = _photonView.IsMine; 
-            _health.Init(_isLocalPlayer, _photonView);
-            _weaponSwitcher.Init(_photonView);
-            
-            if (!_isLocalPlayer) SetupRemotePlayer();
-            else SetupLocalPlayer();
+            _isLocalPlayer = _photonView.IsMine;
+
+            if (_health != null)
+                _health.Init(_isLocalPlayer, _photonView);
+
+            if (_weaponSwitcher != null)
+                _weaponSwitcher.Init(_photonView);
+
+            if (_mouseLook != null)
+                _mouseLook.Init();
+
+            if (!_isLocalPlayer)
+            {
+                SetupRemotePlayer();
+            }
+            else
+            {
+                SetupLocalPlayer();
+            }
         }
 
         private void SetupRemotePlayer()
         {
-            __nicknameText.gameObject.SetActive(true);
-            _tpWeaponHolder.gameObject.SetActive(true); 
+            if (_nicknameText != null) 
+                _nicknameText.gameObject.SetActive(true); 
+
+            if (_tpWeaponHolder != null)
+                _tpWeaponHolder.gameObject.SetActive(true);
+
+            if (_playerCamera != null)
+                _playerCamera.SetActive(false);
+
+            if (_playerUI != null)
+                _playerUI.SetActive(false);
+ 
+            if (_moveController != null)
+                _moveController.enabled = false;
+
+            if (_mouseLook != null)
+                _mouseLook.enabled = false;
+
             Debug.Log($"Remote player setup complete: {_nickName}");
         }
 
         private void SetupLocalPlayer()
-        { 
-            _moveController.Init(_photonView);
-            _playerUI.SetActive(true);
-            _playerCamera.SetActive(true); 
-            _tpWeaponHolder.gameObject.SetActive(false); 
-            
+        {
+            if (_moveController != null)
+                _moveController.Init(_photonView);
+
+            if (_playerUI != null)
+                _playerUI.SetActive(true);
+
+            if (_playerCamera != null)
+                _playerCamera.SetActive(true);
+
+            if (_tpWeaponHolder != null)
+                _tpWeaponHolder.gameObject.SetActive(false);
+ 
+            if (_nicknameText != null)
+                _nicknameText.gameObject.SetActive(false);
+
+            EnablePlayerInput();
+
+            SetCursorState(true);
+
+            Debug.Log($"Local player setup complete: {_nickName}");
+        }
+
+        private void EnablePlayerInput()
+        {
             if (InputManager.Instance != null)
             {
                 InputManager.Instance.EnablePlayerInput();
-                Debug.Log($"Local player setup complete: {_nickName}");
+                Debug.Log("Player input enabled");
             }
             else
             {
-                Debug.LogWarning("InputManager not found! Make sure InputManager exists in scene.");
+                Debug.LogError("Cannot enable player input - InputManager is null!");
             }
-        } 
-        
+        }
+
+        private void SetCursorState(bool locked)
+        {
+            if (locked)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
+            else
+            {
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
+
         [PunRPC]
         public void SetTPWeapon(int weaponIndex)
         {
+            if (_tpWeaponHolder == null) return;
+
             foreach (Transform weapon in _tpWeaponHolder)
             {
                 weapon.gameObject.SetActive(false);
@@ -80,7 +149,34 @@ namespace FPSGame.Player
         public void SetupName(string nickName)
         {
             _nickName = nickName;
-            __nicknameText.text = nickName;
-        } 
+            if (_nicknameText != null)
+            {
+                _nicknameText.text = nickName;
+                Debug.Log($"Nickname set to: {nickName} for player: {gameObject.name}");
+            }
+            else
+            {
+                Debug.LogError("Nickname text component is null!");
+            }
+        }
+ 
+        public void ReactivateComponents()
+        {
+            if (!_isLocalPlayer) return; 
+            if (_mouseLook != null)
+            {
+                _mouseLook.enabled = true;
+            }
+ 
+            if (_moveController != null)
+            {
+                _moveController.enabled = true;
+                _moveController.Init(_photonView);
+            }
+
+            EnablePlayerInput();
+
+            SetCursorState(true);
+        }
     }
 }

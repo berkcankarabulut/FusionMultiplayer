@@ -12,9 +12,10 @@ namespace FPSGame.Player
         private MoveSettings _moveSettings;
 
         [Header("References")] [SerializeField]
-        private CharacterController _characterController; 
+        private CharacterController _characterController;
+
         private PhotonView _photonView;
- 
+
         private Vector2 _input;
         private Vector2 _smoothInput;
         private Vector2 _smoothInputVelocity;
@@ -34,37 +35,24 @@ namespace FPSGame.Player
         private float _syncDelay = 0;
         private float _lastSyncTime = 0;
 
-        private void Awake()
-        {
-            if (_photonView && !_photonView.IsMine)
-            {
-                _networkPosition = transform.position;
-                _networkRotation = transform.rotation;
-            }
-        }
-
         public void Init(PhotonView photonView)
         {
             this.enabled = true;
             _photonView = photonView;
+
+            if (!_photonView || _photonView.IsMine) return;
+            _networkPosition = transform.position;
+            _networkRotation = transform.rotation;
         }
 
         private void OnEnable()
         {
-            // Sadece local player için input event'lerini subscribe et
-            if (_photonView && _photonView.IsMine && InputManager.Instance != null)
-            {
-                InputManager.Instance.InputActions.Player.Jump.performed += OnJumpPerformed;
-            }
+            InputManager.Instance.InputActions.Player.Jump.performed += OnJumpPerformed;
         }
 
         private void OnDisable()
         {
-            // Input event'lerini unsubscribe et
-            if (InputManager.Instance != null)
-            {
-                InputManager.Instance.InputActions.Player.Jump.performed -= OnJumpPerformed;
-            }
+            InputManager.Instance.InputActions.Player.Jump.performed -= OnJumpPerformed;
         }
 
         private void OnJumpPerformed(InputAction.CallbackContext context)
@@ -80,18 +68,8 @@ namespace FPSGame.Player
                 return;
             }
 
-            // InputManager'dan input oku (null check ile)
-            if (InputManager.Instance != null)
-            {
-                _input = InputManager.Instance.MoveInput;
-                _sprinting = InputManager.Instance.IsSprintPressed;
-            }
-            else
-            {
-                // InputManager hazır değilse input'u sıfırla
-                _input = Vector2.zero;
-                _sprinting = false;
-            }
+            _input = InputManager.Instance.MoveInput;
+            _sprinting = InputManager.Instance.IsSprintPressed;
 
             _smoothInput = Vector2.SmoothDamp(
                 _smoothInput,
@@ -104,13 +82,7 @@ namespace FPSGame.Player
 
             MovePlayer();
 
-            // Reset jump flag after processing
-            _jumping = false;
-
-            if (_photonView && _photonView.IsMine && PhotonNetwork.IsConnected)
-            {
-                SyncPosition();
-            }
+            _jumping = false; 
         }
 
         private void MovePlayer()
@@ -168,37 +140,7 @@ namespace FPSGame.Player
                 }
             }
         }
-
-        private void SyncPosition()
-        {
-            if (Time.time - _lastSyncTime > 0.1f)
-            {
-                _lastSyncTime = Time.time;
-                _photonView.RPC(
-                    "NetworkSyncPosition",
-                    RpcTarget.Others,
-                    transform.position,
-                    transform.rotation,
-                    _verticalVelocity
-                );
-            }
-        }
-
-        [PunRPC]
-        private void NetworkSyncPosition(Vector3 position, Quaternion rotation, float vertVelocity)
-        {
-            if (_photonView.IsMine)
-                return;
-
-            _syncTime = 0;
-            _syncDelay = Time.time - _lastSyncTime;
-            _lastSyncTime = Time.time;
-
-            _networkPosition = position;
-            _networkRotation = rotation;
-            _verticalVelocity = vertVelocity;
-        }
-
+ 
         private void SmoothSyncMovement()
         {
             _syncTime += Time.deltaTime;

@@ -6952,7 +6952,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   enableOnStart: 1
   dontDestroyOnLoad: 1
-  showDebugInfo: 0
 --- !u!4 &1567142880
 Transform:
   m_ObjectHideFlags: 0
@@ -7824,10 +7823,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2486e830480213458ba52a52d0c0b08, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 7845132951446058563, guid: 1d6fa3770b6655843bb87ab7403cbdbe, type: 3}
-  leaderBoard: {fileID: 271818811}
-  connectionUI: {fileID: 1268519303}
-  playerSpawn:
+  _player: {fileID: 7845132951446058563, guid: 1d6fa3770b6655843bb87ab7403cbdbe, type: 3}
+  _leaderBoard: {fileID: 271818811}
+  _connectionUI: {fileID: 1268519303}
+  _playerSpawn:
   - {fileID: 354625743}
   - {fileID: 948198351}
   - {fileID: 1093415499}

@@ -433,11 +433,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5c3ee6a187be6a49a47ffee710deebd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  emailOrUsernameInput: {fileID: 1442455984}
-  passwordInput: {fileID: 838971483}
-  loginButton: {fileID: 889395115}
-  registerButton: {fileID: 1027883617}
-  infoText: {fileID: 1205148346}
+  _emailOrUsernameInput: {fileID: 1442455984}
+  _passwordInput: {fileID: 838971483}
+  _loginButton: {fileID: 889395115}
+  _registerButton: {fileID: 1027883617}
+  _infoText: {fileID: 1205148346}
   _sceneLoader: {fileID: 1957956727}
 --- !u!4 &803041070
 Transform:
