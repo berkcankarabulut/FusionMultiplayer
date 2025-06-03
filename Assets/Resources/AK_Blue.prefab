@@ -719,7 +719,8 @@ Transform:
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 100, y: 100, z: 100}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1899649599439770882}
   m_Father: {fileID: 3865393720875826730}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!137 &3495958230040075232
@@ -1122,6 +1123,37 @@ Transform:
   m_Children:
   - {fileID: 2784504414090831560}
   m_Father: {fileID: 5129331065468878335}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &3043967894263576715
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1899649599439770882}
+  m_Layer: 0
+  m_Name: Muzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1899649599439770882
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3043967894263576715}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.00017, y: -0.0099, z: 0.00117}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 5944732734644649884}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3056869775638320252
 GameObject:
@@ -1549,7 +1581,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3865393720875826730}
   - component: {fileID: 1972063855144226526}
-  - component: {fileID: 1836717163240670961}
+  - component: {fileID: 6008701146876698222}
   m_Layer: 0
   m_Name: AK_Blue
   m_TagString: Untagged
@@ -1597,7 +1629,7 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &1836717163240670961
+--- !u!114 &6008701146876698222
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1606,7 +1638,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4534970552143864976}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 607275155f314c239f2ccd34fd55a672, type: 3}
+  m_Script: {fileID: 11500000, guid: db495774220c4a4f948bbaef1f9e08ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _weaponData:
@@ -1615,34 +1647,20 @@ MonoBehaviour:
     _range: 100
     _fireMode: 2
     _recoilUp: 0.05
-    _recoilBack: 0.05
+    _recoilBack: 0.02
     _recoverTime: 0.3
-  _mainCamera: {fileID: 0}
-  _animator: {fileID: 0}
-  _hitVFX: {fileID: 0}
-  _weaponModel: {fileID: 0}
-  _swaySettings:
-    swayClamp: 0.09
-    swaySmooth: 0.5
-    swayIntensity: 1
-    aimingMultiplier: 0.3
-    breathingIntensity: 0.00405
-    breathingSpeed: 1
-    walkingSwayIntensity: 0.003
-    walkingSwaySpeed: 1.5
-    verticalMultiplier: 0.5
-    horizontalMultiplier: 0.5
-    invertHorizontal: 0
-    invertVertical: 0
-  _enableBreathing: 1
-  _enableWalkingSway: 1
   _ammoSystem:
     _currentAmmo: 30
     _magCapacity: 30
     _totalMags: 5
-  _magText: {fileID: 0}
-  _ammoText: {fileID: 0}
-  _showDebugInfo: 0
+  _weaponModel: {fileID: 3865393720875826730}
+  _muzzlePoint: {fileID: 1899649599439770882}
+  _hitVFX: {fileID: 2708598583397607911, guid: 6398d43fe79ea0140913dc5530c646af, type: 3}
+  _animator: {fileID: 1972063855144226526}
+  _muzzleFlash: {fileID: 0}
+  _audioSource: {fileID: 0}
+  _fireSound: {fileID: 0}
+  _reloadSound: {fileID: 0}
 --- !u!1 &4675989504715690864
 GameObject:
   m_ObjectHideFlags: 0

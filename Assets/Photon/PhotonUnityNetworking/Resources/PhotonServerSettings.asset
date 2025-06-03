@@ -30,7 +30,7 @@ MonoBehaviour:
     NetworkLogging: 1
   DevRegion: tr
   PunLogging: 0
-  EnableSupportLogger: 0
+  EnableSupportLogger: 1
   RunInBackground: 1
   StartInOfflineMode: 0
   RpcList:
@@ -45,6 +45,9 @@ MonoBehaviour:
   - NetworkJump
   - NetworkSyncPosition
   - OnPlayerKilled
+  - OnZombieSpawned
+  - OnZombieDeathRPC
+  - TakeDamageRPC
   DisableAutoOpenWizard: 1
-  ShowSettings: 0
+  ShowSettings: 1
   DevRegionSetOnce: 1

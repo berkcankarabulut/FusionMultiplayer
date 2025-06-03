@@ -1,3 +1,4 @@
+using FPSGame.Health;
 using FPSGame.Input;
 using FPSGame.Weapons;
 using Photon.Pun;
@@ -8,9 +9,8 @@ namespace FPSGame.Player
 {
     public class PlayerSetup : MonoBehaviour
     {
-        [Header("Player Components")] [SerializeField]
-        private Health _health;
-
+        [Header("Player Components")] 
+        [SerializeField] private PlayerHealth _health;
         [SerializeField] private MoveController _moveController;
         [SerializeField] private MouseLook _mouseLook;
         [SerializeField] private GameObject _playerCamera;
@@ -19,9 +19,8 @@ namespace FPSGame.Player
         [SerializeField] private GameObject _playerUI;
         [SerializeField] private Transform _tpWeaponHolder;
 
-        [Header("Weapon Components")] [SerializeField]
-        private WeaponController[] _weaponControllers;
-
+        [Header("Weapon Components")] 
+        [SerializeField] private WeaponController _weaponController;
         [SerializeField] private WeaponSwitcher _weaponSwitcher;
 
         private string _nickName;
@@ -75,6 +74,10 @@ namespace FPSGame.Player
             if (_mouseLook != null)
                 _mouseLook.enabled = false;
 
+            // Remote player için weapon controller'ı deaktif et
+            if (_weaponController != null)
+                _weaponController.enabled = false;
+
             Debug.Log($"Remote player setup complete: {_nickName}");
         }
 
@@ -95,8 +98,11 @@ namespace FPSGame.Player
             if (_nicknameText != null)
                 _nicknameText.gameObject.SetActive(false);
 
-            EnablePlayerInput();
+            // Local player için weapon controller'ı aktif et
+            if (_weaponController != null)
+                _weaponController.enabled = true;
 
+            EnablePlayerInput();
             SetCursorState(true);
 
             Debug.Log($"Local player setup complete: {_nickName}");
@@ -163,6 +169,7 @@ namespace FPSGame.Player
         public void ReactivateComponents()
         {
             if (!_isLocalPlayer) return; 
+            
             if (_mouseLook != null)
             {
                 _mouseLook.enabled = true;
@@ -174,8 +181,12 @@ namespace FPSGame.Player
                 _moveController.Init(_photonView);
             }
 
-            EnablePlayerInput();
+            if (_weaponController != null)
+            {
+                _weaponController.enabled = true;
+            }
 
+            EnablePlayerInput();
             SetCursorState(true);
         }
     }

@@ -1,43 +1,38 @@
- 
 using UnityEngine;
- 
+
 
 namespace FPSGame.AI
 {
-    public class ZombieMovementController : MonoBehaviour, IMovement
+    public class AIMoveController  
     {
         private UnityEngine.AI.NavMeshAgent _agent;
-        private ZombieData _data;
-        
-        public void Initialize(UnityEngine.AI.NavMeshAgent agent, ZombieData data)
+        private float _stoppingDistance;
+        public UnityEngine.AI.NavMeshAgent Agent => _agent;
+
+        public void Initialize(UnityEngine.AI.NavMeshAgent agent, float stoppingDistance)
         {
             _agent = agent;
-            _data = data;
+            _stoppingDistance = stoppingDistance;
         }
-        
+
         public void MoveTo(Vector3 position)
         {
             if (!_agent.isActiveAndEnabled) return;
             _agent.SetDestination(position);
             _agent.isStopped = false;
         }
-        
+
         public void Stop()
         {
             if (!_agent.isActiveAndEnabled) return;
             _agent.isStopped = true;
         }
-        
+
         public bool HasReachedDestination()
         {
-            return _agent.remainingDistance <= _data.stoppingDistance && !_agent.pathPending;
-        }
-        
-        public float GetDistanceToTarget()
-        {
-            return _agent.remainingDistance;
-        }
-        
+            return _agent.remainingDistance <= _stoppingDistance && !_agent.pathPending;
+        } 
+
         public void SetSpeed(float speed)
         {
             if (_agent.isActiveAndEnabled)
@@ -47,4 +42,3 @@ namespace FPSGame.AI
         }
     }
 }
-  

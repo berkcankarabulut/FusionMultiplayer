@@ -4914,7 +4914,7 @@ GameObject:
   - component: {fileID: 2708598583397607899}
   - component: {fileID: -483947338255993360}
   m_Layer: 0
-  m_Name: CFXR Impact Glowing HDR (Blue)
+  m_Name: HitParticle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

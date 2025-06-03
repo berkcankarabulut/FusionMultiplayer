@@ -20,13 +20,13 @@ namespace FPSGame.AI.Actions
             {
                 _idleStartTime = Time.time;
                 _isIdle = true;
-                Debug.Log($"Zombie idle moduna geçti - {_data.idleTime} saniye bekleyecek");
+                Debug.Log($"Idle moduna geçti - {_data.idleTime} saniye bekleyecek");
                 return Status.RUNNING;
             }
              
             if (Time.time >= _idleStartTime + _data.idleTime)
             {
-                Debug.Log("Zombie idle süresini tamamladı");
+                Debug.Log("Idle süresini tamamladı");
                 _isIdle = false;
                 return Status.SUCCESS;
             }

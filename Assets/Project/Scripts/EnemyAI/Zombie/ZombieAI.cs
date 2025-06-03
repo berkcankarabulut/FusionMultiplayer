@@ -1,87 +1,192 @@
-using BehaviourSystem;
-using FPSGame.AI.Actions;
 using UnityEngine;
 using UnityEngine.AI;
+using Photon.Pun;
+using BehaviourSystem;
+using FPSGame.AI.Actions;
 
 namespace FPSGame.AI
 {
-    [RequireComponent(typeof(NavMeshAgent))]
-    public class ZombieAI : MonoBehaviour
+    [RequireComponent(typeof(NavMeshAgent), typeof(ZombieHealth))]
+    public class ZombieAI : BaseAI
     {
-        [SerializeField] private ZombieData _zombieData;
+        [Header("Zombie AI Settings")] [SerializeField]
+        private ZombieData zombieData;
 
-        [Header("Components")] 
-        [SerializeField]
-        private PatrolSystem _patrolSystem; 
-        [SerializeField] 
-        private NavMeshAgent _agent;
+        [SerializeField] private PatrolSystem patrolSystem;
+        [SerializeField] private Animator animator; 
+        [SerializeField] private NavMeshAgent agent;
+        [SerializeField] private ZombieHealth zombieHealth;
+        
+        private AIMoveController aiMoveController;
+        private BehaviourTree behaviorTree;
 
-        private IMovement _movement;
-        private BehaviourTree _behaviorTree;
-
-        private void Start()
+        private void Awake()
         {
-            InitializeComponents();
-            BuildBehaviorTree();
+            GetComponents();
+            ValidateComponents();
         }
 
-        private void InitializeComponents()
+        protected override void OnAIInitialized()
         {
-            var movementController = gameObject.AddComponent<ZombieMovementController>();
-            movementController.Initialize(_agent, _zombieData);
-            _movement = movementController;
-            _patrolSystem.Initialize();
+            SetupComponents();
+            BuildBehaviorTree();
+            Debug.Log("Zombie AI initialized");
+        }
+
+        protected override void OnAIStopped()
+        {
+            if (agent != null && agent.isActiveAndEnabled)
+                agent.isStopped = true;
+
+            Debug.Log("Zombie AI stopped");
+        }
+
+        protected override void UpdateAI()
+        {
+            if (behaviorTree != null && !zombieHealth.IsDead)
+            {
+                behaviorTree.Process();
+                UpdateAnimations();
+            }
+        }
+
+        private void GetComponents()
+        {
+            agent = GetComponent<NavMeshAgent>();
+            zombieHealth = GetComponent<ZombieHealth>();
+
+            if (patrolSystem == null)
+                patrolSystem = GetComponent<PatrolSystem>();
+
+            if (animator == null)
+                animator = GetComponentInChildren<Animator>();
+        }
+
+        private void ValidateComponents()
+        {
+            if (agent == null) Debug.LogError($"NavMeshAgent not found on {name}");
+            if (zombieHealth == null) Debug.LogError($"ZombieHealth not found on {name}");
+            if (patrolSystem == null) Debug.LogError($"PatrolSystem not found on {name}");
+            if (zombieData == null) Debug.LogError($"ZombieData not assigned on {name}");
+        }
+
+        private void SetupComponents()
+        {
+            // Agent setup - sadece Master Client
+            if (agent != null)
+            {
+                agent.enabled = PhotonNetwork.IsMasterClient;
+                if (agent.enabled)
+                {
+                    agent.isStopped = false;
+                }
+            }
+
+            // AI Move Controller
+            if (aiMoveController == null)
+            {
+                aiMoveController = new AIMoveController();
+                aiMoveController.Initialize(agent, zombieData.stoppingDistance);
+            }
+
+            // Patrol system
+            if (patrolSystem != null)
+                patrolSystem.Initialize();
+
+            // Health events
+            if (zombieHealth != null)
+            {
+                zombieHealth.OnDeath += OnZombieDeath;
+                zombieHealth.OnDamageTaken += OnZombieDamage;
+            }
         }
 
         private void BuildBehaviorTree()
         {
-            _behaviorTree = new BehaviourTree("Simple Zombie AI"); 
-            Sequence patrolSequence = new Sequence("Patrol Sequence"); 
-            PatrolAction patrolAction = new PatrolAction(_movement, _patrolSystem);
+            behaviorTree = new BehaviourTree("Zombie AI");
+
+            Sequence patrolSequence = new Sequence("Patrol Sequence");
+            PatrolAction patrolAction = new PatrolAction(aiMoveController, patrolSystem);
             patrolSequence.AddChild(patrolAction);
 
-            // Sonra bekle
-            IdleAction idleAction = new IdleAction(_zombieData);
+            IdleAction idleAction = new IdleAction(zombieData);
             patrolSequence.AddChild(idleAction);
 
-            // Ana tree'ye ekle
-            _behaviorTree.AddChild(patrolSequence);
+            behaviorTree.AddChild(patrolSequence);
 
-            // Debug: Tree yapısını yazdır
-            Debug.Log("=== Zombie Behavior Tree ===");
-            _behaviorTree.PrintTree();
+            Debug.Log("=== Zombie Behavior Tree Built ===");
+            behaviorTree.PrintTree();
         }
 
-        private void Update()
+        private void UpdateAnimations()
         {
-            if (_behaviorTree != null)
-            {
-                _behaviorTree.Process();
-            }
+            if (animator == null) return;
+
+            bool isMoving = agent != null && agent.velocity.magnitude > 0.1f;
+            animator.SetBool("IsMoving", isMoving);
+            animator.SetBool("IsDead", zombieHealth.IsDead);
         }
 
-        // Debug için Gizmos
+        private void OnZombieDeath()
+        {
+            StopAI();
+            UpdateAnimations();
+        }
+
+        private void OnZombieDamage(float damage, GameObject attacker)
+        {
+            // Damage effects burada eklenebilir
+        }
+
+        public void ResetAI()
+        {
+            // Health reset
+            if (zombieHealth != null)
+                zombieHealth.ResetHealth();
+
+            // Patrol reset
+            if (patrolSystem != null)
+                patrolSystem.Initialize();
+
+            // Agent reset
+            if (agent != null && agent.isActiveAndEnabled)
+                agent.Warp(transform.position);
+
+            // Animation reset
+            if (animator != null)
+            {
+                animator.SetBool("IsMoving", false);
+                animator.SetBool("IsDead", false);
+            }
+
+            // AI'ı yeniden başlat
+            if (PhotonNetwork.IsMasterClient)
+                InitializeAI();
+        }
+
         private void OnDrawGizmosSelected()
         {
-            if (_zombieData == null) return;
+            if (zombieData == null) return;
 
-            // Patrol radius
             Gizmos.color = Color.blue;
-            Vector3 center = Application.isPlaying ? _patrolSystem.transform.position : transform.position;
-            Gizmos.DrawWireSphere(center, _zombieData.patrolRadius);
+            Vector3 center = patrolSystem != null ? patrolSystem.transform.position : transform.position;
+            Gizmos.DrawWireSphere(center, zombieData.patrolRadius);
 
-            // Current target
-            if (Application.isPlaying && _patrolSystem != null && _patrolSystem.HasCurrentTarget)
+            if (Application.isPlaying && patrolSystem != null && patrolSystem.HasCurrentTarget)
             {
                 Gizmos.color = Color.red;
-                Gizmos.DrawSphere(_patrolSystem.CurrentTarget, 0.5f);
-                Gizmos.DrawLine(transform.position, _patrolSystem.CurrentTarget);
+                Gizmos.DrawSphere(patrolSystem.CurrentTarget, 0.5f);
+                Gizmos.DrawLine(transform.position, patrolSystem.CurrentTarget);
             }
+        }
 
-            // Spawn point
-            Gizmos.color = Color.green;
-            Vector3 spawn = Application.isPlaying ? _patrolSystem.transform.position : transform.position;
-            Gizmos.DrawWireCube(spawn, Vector3.one);
+        private void OnDestroy()
+        {
+            if (zombieHealth != null)
+            {
+                zombieHealth.OnDeath -= OnZombieDeath;
+                zombieHealth.OnDamageTaken -= OnZombieDamage;
+            }
         }
     }
 }

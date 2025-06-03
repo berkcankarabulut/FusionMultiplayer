@@ -5,7 +5,7 @@ namespace FPSGame.AI.Actions
 {
     public class PatrolAction : Leaf
     {
-        private readonly IMovement _movement;
+        private readonly AIMoveController _movement;
         private readonly PatrolSystem _patrolSystem;
         private bool _isMoving;
         private Vector3 _targetPosition;
@@ -14,7 +14,7 @@ namespace FPSGame.AI.Actions
         private readonly float _stuckThreshold = 2f; 
         private readonly float _stuckDistance = 0.1f;  
         
-        public PatrolAction(IMovement movement, PatrolSystem patrolSystem) 
+        public PatrolAction(AIMoveController movement, PatrolSystem patrolSystem) 
             : base("Patrol")
         { 
             _movement = movement;
@@ -34,12 +34,12 @@ namespace FPSGame.AI.Actions
                 _movement.MoveTo(_targetPosition);
                 _isMoving = true;
                 _stuckTimer = 0f;
-                _lastPosition = ((MonoBehaviour)_movement).transform.position;
+                _lastPosition = _movement.Agent.transform.position;
                  
                 return Status.RUNNING;
             }
              
-            Vector3 currentPosition = ((MonoBehaviour)_movement).transform.position;
+            Vector3 currentPosition = _movement.Agent.transform.position;
             if (Vector3.Distance(currentPosition, _lastPosition) < _stuckDistance)
             {
                 _stuckTimer += Time.deltaTime;

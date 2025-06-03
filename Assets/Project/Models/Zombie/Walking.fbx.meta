@@ -1,44 +1,9 @@
 fileFormatVersion: 2
-guid: 99c4c6709d23a1f498eebb454c512d01
+guid: 40212e2e513f8f84fbf3a801dc017f24
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: body_M
-    second: {fileID: 2100000, guid: 7d69936a104a62d498a58aa94f646f26, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: body_M1
-    second: {fileID: 2100000, guid: f9c1e8f42ec945d4ba7e0b22097fc8fc, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: glass_hair_M
-    second: {fileID: 2100000, guid: 7dda7f0ce6074db46b2fcf754b8f3109, type: 2}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: FuzZombie_body_diffuse
-    second: {fileID: 2800000, guid: 5342c394e748a24479f37fdba12bafbf, type: 3}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: FuzZombie_diffuse
-    second: {fileID: 2800000, guid: f9e19dc784bdee244b530f4118a584f0, type: 3}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: FuzZombie_normal
-    second: {fileID: 2800000, guid: e3dce09a9e345f7489f0a20b30d35581, type: 3}
-  - first:
-      type: UnityEngine:Texture2D
-      assembly: UnityEngine.CoreModule
-      name: FuzZombie_specular
-    second: {fileID: 2800000, guid: 23be3cc3aaaf27748b3a31b371232e9c, type: 3}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -68,11 +33,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Idle
+      name: Walking
       takeName: mixamo.com
       internalID: -203655887218126122
       firstFrame: 0
-      lastFrame: 240
+      lastFrame: 242
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -99,7 +64,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.5
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -154,7 +119,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.5
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0

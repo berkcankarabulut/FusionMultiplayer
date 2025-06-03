@@ -5,7 +5,7 @@ using Photon.Pun;
 using UnityEngine;
 using Hashtable = ExitGames.Client.Photon.Hashtable;
 using Cysharp.Threading.Tasks;
-using UnityEngine.Serialization;
+using FPSGame.AI;
 
 namespace FPSGame.Networking
 {
@@ -15,7 +15,7 @@ namespace FPSGame.Networking
 
         [SerializeField] private GameObject _player;
         [SerializeField] private LeaderBoard _leaderBoard;
- 
+        [SerializeField] private ZombieSpawnManager _zombieSpawnManager;
         [Space]
         [Header("Room Settings")]
         [SerializeField] private GameObject _connectionUI; 
@@ -71,7 +71,8 @@ namespace FPSGame.Networking
         {
             base.OnJoinedRoom();
             Debug.Log($"Joined room with nickname: {PhotonNetwork.NickName}");
-            PlayerSpawn();
+            PlayerSpawn(); 
+            _zombieSpawnManager.TriggerSpawn();
             _leaderBoard.Init();
         }
 
