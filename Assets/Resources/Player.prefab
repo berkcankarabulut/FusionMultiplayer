@@ -1188,11 +1188,11 @@ MonoBehaviour:
   - {fileID: 6634901592518264933}
   - {fileID: 7122200490226855968}
   _swaySettings:
-    swayClamp: 0.09
-    swaySmooth: 0.522
+    swayClamp: 0.04
+    swaySmooth: 0.7
     swayIntensity: 1
     aimingMultiplier: 0.3
-    breathingIntensity: 0.001
+    breathingIntensity: 0.005
     breathingSpeed: 1.2
     walkingSwayIntensity: 0.01
     walkingSwaySpeed: 4
@@ -2350,14 +2350,9 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6008701146876698222, guid: d87163a7311f7b043806cc071819b3ce, type: 3}
-      propertyPath: _animator
-      value: 
-      objectReference: {fileID: 0}
     m_RemovedComponents:
-    - {fileID: 1836717163240670961, guid: d87163a7311f7b043806cc071819b3ce, type: 3}
-    - {fileID: 1972063855144226526, guid: d87163a7311f7b043806cc071819b3ce, type: 3}
-    - {fileID: 7285863687757414339, guid: d87163a7311f7b043806cc071819b3ce, type: 3}
+    - {fileID: 0}
+    - {fileID: 0}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

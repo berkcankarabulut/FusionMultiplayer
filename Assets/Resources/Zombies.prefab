@@ -82,6 +82,8 @@ MonoBehaviour:
     idleTime: 3
   patrolSystem: {fileID: 5316392526367931954}
   animator: {fileID: 6578023679333009366}
+  agent: {fileID: 0}
+  zombieHealth: {fileID: 0}
 --- !u!114 &5316392526367931954
 MonoBehaviour:
   m_ObjectHideFlags: 0

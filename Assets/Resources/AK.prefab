@@ -1646,8 +1646,8 @@ MonoBehaviour:
     _fireRate: 10
     _range: 100
     _fireMode: 1
-    _recoilUp: 0.05
-    _recoilBack: 0.02
+    _recoilUp: 0.01
+    _recoilBack: 0.05
     _recoverTime: 0.3
   _ammoSystem:
     _currentAmmo: 30
